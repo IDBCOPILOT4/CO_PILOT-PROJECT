@@ -34,3 +34,20 @@ export async function createNote(note) {
 
   return response.json();
 }
+
+export async function updateNote(id, note) {
+  const response = await fetch(`${API_BASE}/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(note)
+  });
+
+  if (!response.ok) {
+    const errorMessage = (await response.text()) || "Failed to update note";
+    throw new Error(errorMessage);
+  }
+
+  return response.json();
+}

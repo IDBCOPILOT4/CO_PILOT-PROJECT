@@ -29,4 +29,11 @@ public class NoteService {
         note.setContent(content);
         return noteRepository.save(note);
     }
+
+    public Note updateNote(Long id, String title, String content) {
+        Note note = getNoteById(id);
+        note.setTitle(title);
+        note.setContent(content);
+        return noteRepository.save(note);
+    }
 }
