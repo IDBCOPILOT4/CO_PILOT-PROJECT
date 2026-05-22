@@ -6,6 +6,10 @@ function formatDate(dateString) {
   return new Date(dateString).toLocaleString();
 }
 
+/**
+ * Handles note details with view/edit/delete flows.
+ * Draft state is separated from persisted state so cancel can safely discard edits.
+ */
 function NoteDetailsPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -40,6 +44,7 @@ function NoteDetailsPage() {
       return;
     }
 
+    // Capture original values so cancel can revert unsaved input.
     setDraftTitle(note.title);
     setDraftContent(note.content);
     setOriginalTitle(note.title);

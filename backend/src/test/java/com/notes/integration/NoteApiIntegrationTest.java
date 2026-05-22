@@ -1,6 +1,7 @@
 package com.notes.integration;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -41,6 +42,14 @@ class NoteApiIntegrationTest {
     }
 
     @Test
+        void openApiDocs_endpointIsAvailable() throws Exception {
+                mockMvc.perform(get("/v3/api-docs"))
+                                .andExpect(status().isOk())
+                                .andExpect(content().string(containsString("/api/notes")))
+                                .andExpect(content().string(containsString("CreateNoteRequest")));
+        }
+
+        @Test
     void fullCrudFlow_createReadUpdateDelete_worksEndToEnd() throws Exception {
         MvcResult createResult = mockMvc.perform(post("/api/notes")
                         .contentType(MediaType.APPLICATION_JSON)

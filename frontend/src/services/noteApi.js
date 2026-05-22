@@ -1,5 +1,8 @@
 const API_BASE = "/api/notes";
 
+/**
+ * Fetches all notes from the backend API.
+ */
 export async function fetchAllNotes() {
   const response = await fetch(API_BASE);
   if (!response.ok) {
@@ -8,6 +11,9 @@ export async function fetchAllNotes() {
   return response.json();
 }
 
+/**
+ * Fetches one note by id and normalizes not-found errors.
+ */
 export async function fetchNoteById(id) {
   const response = await fetch(`${API_BASE}/${id}`);
   if (!response.ok) {
@@ -19,6 +25,9 @@ export async function fetchNoteById(id) {
   return response.json();
 }
 
+/**
+ * Creates a new note.
+ */
 export async function createNote(note) {
   const response = await fetch(API_BASE, {
     method: "POST",
@@ -35,6 +44,9 @@ export async function createNote(note) {
   return response.json();
 }
 
+/**
+ * Deletes one note by id.
+ */
 export async function deleteNote(id) {
   const response = await fetch(`${API_BASE}/${id}`, {
     method: "DELETE"
@@ -48,6 +60,9 @@ export async function deleteNote(id) {
   }
 }
 
+/**
+ * Updates a note and surfaces backend validation text when available.
+ */
 export async function updateNote(id, note) {
   const response = await fetch(`${API_BASE}/${id}`, {
     method: "PUT",
