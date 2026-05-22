@@ -53,8 +53,16 @@ function NoteDetailsPage() {
       return;
     }
 
-    if (!draftTitle.trim() || !draftContent.trim()) {
-      setError("Title and content are required");
+    const titleMissing = !draftTitle.trim();
+    const contentMissing = !draftContent.trim();
+    if (titleMissing || contentMissing) {
+      if (titleMissing && contentMissing) {
+        setError("Both title and content are required");
+      } else if (titleMissing) {
+        setError("Title is required");
+      } else {
+        setError("Content is required");
+      }
       return;
     }
 
