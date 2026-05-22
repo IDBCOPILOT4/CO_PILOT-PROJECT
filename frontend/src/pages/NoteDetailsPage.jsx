@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { fetchNoteById, updateNote } from "../services/noteApi";
+import { deleteNote, fetchNoteById, updateNote } from "../services/noteApi";
 
 function formatDate(dateString) {
   return new Date(dateString).toLocaleString();
@@ -12,6 +12,7 @@ function NoteDetailsPage() {
   const [note, setNote] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [draftTitle, setDraftTitle] = useState("");
@@ -52,8 +53,16 @@ function NoteDetailsPage() {
       return;
     }
 
-    if (!draftTitle.trim() || !draftContent.trim()) {
-      setError("Title and content are required");
+    const titleMissing = !draftTitle.trim();
+    const contentMissing = !draftContent.trim();
+    if (titleMissing || contentMissing) {
+      if (titleMissing && contentMissing) {
+        setError("Both title and content are required");
+      } else if (titleMissing) {
+        setError("Title is required");
+      } else {
+        setError("Content is required");
+      }
       return;
     }
 
@@ -89,9 +98,23 @@ function NoteDetailsPage() {
     setError("");
   }
 
-  function handleDeletePlaceholder() {
-    // Placeholder only: delete logic not implemented yet.
-    alert("Delete feature will be added later.");
+  async function handleDeleteNote() {
+    const confirmed = window.confirm("Are you sure you want to delete this note?");
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setDeleteLoading(true);
+      setError("");
+      await deleteNote(id);
+      navigate("/");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setDeleteLoading(false);
+    }
   }
 
   if (loading) {
@@ -145,8 +168,8 @@ function NoteDetailsPage() {
             <button type="button" onClick={handleStartEdit}>
               Edit
             </button>
-            <button type="button" onClick={handleDeletePlaceholder} className="danger">
-              Delete
+            <button type="button" onClick={handleDeleteNote} className="danger" disabled={deleteLoading}>
+              {deleteLoading ? "Deleting..." : "Delete"}
             </button>
             <button type="button" onClick={() => navigate("/")}>
               Return

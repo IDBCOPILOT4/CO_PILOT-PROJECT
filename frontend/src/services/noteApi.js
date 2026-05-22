@@ -35,6 +35,19 @@ export async function createNote(note) {
   return response.json();
 }
 
+export async function deleteNote(id) {
+  const response = await fetch(`${API_BASE}/${id}`, {
+    method: "DELETE"
+  });
+
+  if (!response.ok) {
+    if (response.status === 404) {
+      throw new Error("Note not found");
+    }
+    throw new Error("Failed to delete note");
+  }
+}
+
 export async function updateNote(id, note) {
   const response = await fetch(`${API_BASE}/${id}`, {
     method: "PUT",
@@ -48,6 +61,5 @@ export async function updateNote(id, note) {
     const errorMessage = (await response.text()) || "Failed to update note";
     throw new Error(errorMessage);
   }
-
   return response.json();
 }

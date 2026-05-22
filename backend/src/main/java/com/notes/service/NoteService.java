@@ -30,6 +30,12 @@ public class NoteService {
         return noteRepository.save(note);
     }
 
+    public void deleteNote(Long id) {
+        noteRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Note not found with id: " + id));
+        noteRepository.deleteById(id);
+    }
+
     public Note updateNote(Long id, String title, String content) {
         Note note = getNoteById(id);
         note.setTitle(title);
