@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { fetchNoteById } from "../services/noteApi";
+import { deleteNote, fetchNoteById } from "../services/noteApi";
 
 function formatDate(dateString) {
   return new Date(dateString).toLocaleString();
@@ -12,6 +12,7 @@ function NoteDetailsPage() {
   const [note, setNote] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     async function loadNote() {
@@ -33,9 +34,23 @@ function NoteDetailsPage() {
     alert("Edit feature will be added later.");
   }
 
-  function handleDeletePlaceholder() {
-    // Placeholder only: delete logic not implemented yet.
-    alert("Delete feature will be added later.");
+  async function handleDeleteNote() {
+    const confirmed = window.confirm("Are you sure you want to delete this note?");
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setDeleteLoading(true);
+      setError("");
+      await deleteNote(id);
+      navigate("/");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setDeleteLoading(false);
+    }
   }
 
   if (loading) {
@@ -60,7 +75,7 @@ function NoteDetailsPage() {
         <button type="button" onClick={handleEditPlaceholder}>
           Edit
         </button>
-        <button type="button" onClick={handleDeletePlaceholder} className="danger">
+        <button type="button" onClick={handleDeleteNote} className="danger" disabled={deleteLoading}>
           Delete
         </button>
         <button type="button" onClick={() => navigate("/")}>

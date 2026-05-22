@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,6 +40,12 @@ public class NoteController {
     public ResponseEntity<Note> createNote(@Valid @RequestBody CreateNoteRequest request) {
         Note createdNote = noteService.createNote(request.getTitle(), request.getContent());
         return ResponseEntity.status(HttpStatus.CREATED).body(createdNote);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteNote(@PathVariable Long id) {
+        noteService.deleteNote(id);
+        return ResponseEntity.noContent().build();
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

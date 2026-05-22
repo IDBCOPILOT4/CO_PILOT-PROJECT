@@ -29,4 +29,10 @@ public class NoteService {
         note.setContent(content);
         return noteRepository.save(note);
     }
+
+    public void deleteNote(Long id) {
+        noteRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Note not found with id: " + id));
+        noteRepository.deleteById(id);
+    }
 }
