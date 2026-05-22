@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { deleteNote, fetchNoteById } from "../services/noteApi";
+import { deleteNote, fetchNoteById, updateNote } from "../services/noteApi";
 
 function formatDate(dateString) {
   return new Date(dateString).toLocaleString();
@@ -13,6 +13,12 @@ function NoteDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [draftTitle, setDraftTitle] = useState("");
+  const [draftContent, setDraftContent] = useState("");
+  const [originalTitle, setOriginalTitle] = useState("");
+  const [originalContent, setOriginalContent] = useState("");
 
   useEffect(() => {
     async function loadNote() {
@@ -29,9 +35,59 @@ function NoteDetailsPage() {
     loadNote();
   }, [id]);
 
-  function handleEditPlaceholder() {
-    // Placeholder only: edit logic not implemented yet.
-    alert("Edit feature will be added later.");
+  function handleStartEdit() {
+    if (!note) {
+      return;
+    }
+
+    setDraftTitle(note.title);
+    setDraftContent(note.content);
+    setOriginalTitle(note.title);
+    setOriginalContent(note.content);
+    setError("");
+    setIsEditMode(true);
+  }
+
+  async function handleSave() {
+    if (isSaving) {
+      return;
+    }
+
+    if (!draftTitle.trim() || !draftContent.trim()) {
+      setError("Title and content are required");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const updatedNote = await updateNote(id, {
+        title: draftTitle,
+        content: draftContent
+      });
+      setNote(updatedNote);
+      setIsEditMode(false);
+      setError("");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  function handleCancel() {
+    const hasChanges = draftTitle !== originalTitle || draftContent !== originalContent;
+
+    if (hasChanges) {
+      const shouldDiscard = window.confirm("Are you sure you want to discard your changes?");
+      if (!shouldDiscard) {
+        return;
+      }
+    }
+
+    setDraftTitle(originalTitle);
+    setDraftContent(originalContent);
+    setIsEditMode(false);
+    setError("");
   }
 
   async function handleDeleteNote() {
@@ -67,20 +123,51 @@ function NoteDetailsPage() {
 
   return (
     <section className="note-details">
-      <h2>{note.title}</h2>
+      {isEditMode ? (
+        <input
+          type="text"
+          value={draftTitle}
+          onChange={(event) => setDraftTitle(event.target.value)}
+          placeholder="Enter note title"
+        />
+      ) : (
+        <h2>{note.title}</h2>
+      )}
       <p className="note-date">Created: {formatDate(note.createdAt)}</p>
-      <p className="note-content">{note.content}</p>
+      {isEditMode ? (
+        <textarea
+          rows="8"
+          value={draftContent}
+          onChange={(event) => setDraftContent(event.target.value)}
+          placeholder="Write your note..."
+        />
+      ) : (
+        <p className="note-content">{note.content}</p>
+      )}
 
       <div className="button-row">
-        <button type="button" onClick={handleEditPlaceholder}>
-          Edit
-        </button>
-        <button type="button" onClick={handleDeleteNote} className="danger" disabled={deleteLoading}>
-          Delete
-        </button>
-        <button type="button" onClick={() => navigate("/")}>
-          Return
-        </button>
+        {isEditMode ? (
+          <>
+            <button type="button" onClick={handleSave} disabled={isSaving}>
+              {isSaving ? "Saving..." : "Save"}
+            </button>
+            <button type="button" onClick={handleCancel} disabled={isSaving}>
+              Cancel
+            </button>
+          </>
+        ) : (
+          <>
+            <button type="button" onClick={handleStartEdit}>
+              Edit
+            </button>
+            <button type="button" onClick={handleDeleteNote} className="danger" disabled={deleteLoading}>
+              {deleteLoading ? "Deleting..." : "Delete"}
+            </button>
+            <button type="button" onClick={() => navigate("/")}>
+              Return
+            </button>
+          </>
+        )}
       </div>
     </section>
   );

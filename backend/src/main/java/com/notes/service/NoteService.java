@@ -35,4 +35,11 @@ public class NoteService {
                 .orElseThrow(() -> new IllegalArgumentException("Note not found with id: " + id));
         noteRepository.deleteById(id);
     }
+
+    public Note updateNote(Long id, String title, String content) {
+        Note note = getNoteById(id);
+        note.setTitle(title);
+        note.setContent(content);
+        return noteRepository.save(note);
+    }
 }
